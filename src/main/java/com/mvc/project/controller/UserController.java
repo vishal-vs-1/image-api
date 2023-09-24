@@ -33,7 +33,7 @@ public class UserController {
 	public String registerUser(@RequestBody RegisterDto dto) {
 		service.registerUser(dto);
 		return "user successfully registered";
-	}
+	} 
 	
 	@PostMapping("/upload")
 	public String uploadImage(@RequestParam MultipartFile image, Authentication auth) throws IOException {
@@ -53,7 +53,8 @@ public class UserController {
 		return "image deleted succefully";
 	}
 
-	public String mailRandomImage(Authentication auth, String receiverMail) {
+	@PostMapping("/sendMail/{receiverMail}")
+	public String mailRandomImage(Authentication auth, @PathVariable String receiverMail) throws Exception {
 		service.mailRandomImage(auth.getName(), receiverMail);
 		return "image successfully mailed";
 	}

@@ -19,6 +19,9 @@ import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,8 +32,10 @@ import com.mvc.project.entity.Image;
 import com.mvc.project.entity.Role;
 import com.mvc.project.entity.User;
 import com.mvc.project.repository.ImageRepository;
+import com.mvc.project.repository.RoleRepository;
 import com.mvc.project.repository.UserRepository;
 
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,14 +51,12 @@ public class UserServiceImpl implements UserService{
 	
 	private final ImageRepository imgRepo;
 	
+	private final JavaMailSender mailSender;
 	
-	
-//	private RoleRepository roleRepo;
+	private final RoleRepository roleRepo;
 	
 	@Value("${file.path}")
 	private String STORAGE_PATH;
-	
-	private String appMail;
 	
 	@Override
 	public void registerUser(RegisterDto dto) {
@@ -61,7 +64,14 @@ public class UserServiceImpl implements UserService{
 		var u = RegisterDto.registerDtoToUser(dto);
 		u.setPassword(encoder.encode(dto.getPassword()));
 		u.setRoles(new HashSet<>());
-		u.getRoles().add(new Role(1, "user"));
+		
+		Optional<Role> op = roleRepo.findById(1);
+		if(op.isEmpty()) {
+			Role role = new Role(1, "user");
+			roleRepo.save(role);
+		}
+		
+		u.getRoles().add(roleRepo.findById(1).get());
 		
 		userRepo.save(u);
 	}
@@ -133,12 +143,23 @@ public class UserServiceImpl implements UserService{
 	}
 
 	@Override
-	public void mailRandomImage(String name, String receiverMail) throws Exception {
+	public void mailRandomImage(String userMail, String receiverMail) throws Exception {
 		String img = this.getRandomImage();
 		
+		MimeMessage mimeMessage = mailSender.createMimeMessage();
+		
+		var helper = new MimeMessageHelper(mimeMessage, true);
+		
+		helper.setTo(receiverMail);
+		helper.setText("from" + userMail);
+		helper.addAttachment(img, new FileSystemResource(new File(img)));
+		
+		mailSender.send(mimeMessage);
 	}
 	
-	private User getCurrentUser(String email) {
+	
+	
+	private User getCurrentUser(String email) {		
 		return userRepo.findByEmail(email).get();
 	}
 
