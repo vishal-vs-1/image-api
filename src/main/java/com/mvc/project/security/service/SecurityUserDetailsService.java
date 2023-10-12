@@ -1,4 +1,4 @@
-package com.mvc.project.security;
+package com.mvc.project.security.service;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.mvc.project.repository.UserRepository;
+import com.mvc.project.security.SecurityUserDetails;
 
 import lombok.AllArgsConstructor;
 
@@ -21,5 +22,4 @@ public class SecurityUserDetailsService implements UserDetailsService{
 		return o.map(SecurityUserDetails::new)
 				.orElseThrow(()-> new UsernameNotFoundException("User doesn't exists"));
 	}
-
 }

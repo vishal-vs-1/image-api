@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class UserController {
 
 	private UserService service;
 	
+	@CrossOrigin
 	@PostMapping("/register")
 	public String registerUser(@RequestBody RegisterDto dto) {
 		service.registerUser(dto);
@@ -48,7 +50,6 @@ public class UserController {
 	
 	@DeleteMapping("/deleteImage/{id}")
 	public String deleteImage(Authentication auth,@PathVariable int id) throws Exception {
-		log.info("hjvujgb");
 		service.deleteImages(id, auth.getName());
 		return "image deleted succefully";
 	}
