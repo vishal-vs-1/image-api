@@ -18,7 +18,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter{
@@ -33,24 +35,31 @@ public class JwtFilter extends OncePerRequestFilter{
 		// TODO Auto-generated method stub
 		String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+			log.info("no token detected");
 			filterChain.doFilter(request, response);
 			return;
 		}
 		
 		String token = authHeader.substring(7);
 		String username = jwtService.extractUserMail(token);
+		log.info("token " + token + ", username " + username);
 		
 		if(username != null && SecurityContextHolder.getContext().getAuthentication()==null) {
+			log.info("token present");
 			UserDetails userDetails = udService.loadUserByUsername(username);
 			if(jwtService.validateToken(token)) {
+				
+				log.info("token is valid");
+				
 				UsernamePasswordAuthenticationToken authToken = 
 						new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 				authToken.setDetails( new WebAuthenticationDetailsSource().buildDetails(request));
 				SecurityContextHolder.getContext().setAuthentication(authToken);
-				filterChain.doFilter(request, response);
+				
+				log.info("sucessfully authenticated");
 			}
-			
-		}				
+		}
+		log.info("filtering");
+		filterChain.doFilter(request, response);
 	}
-
 }

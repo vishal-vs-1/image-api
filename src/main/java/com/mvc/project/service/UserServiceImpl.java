@@ -108,22 +108,15 @@ public class UserServiceImpl implements UserService{
 	}
 	
 	@Override
-	public List<ImageDataDto> getAllUserImages(String email) throws Exception{
+	public List<String> getAllUserImages(String email) throws Exception{
 		List<Image> list = imgRepo.findImagesByUserEmail(email);
-		List<ImageDataDto> res = new ArrayList<>();
+		List<String> res = new ArrayList<>();
 		
 		if(list.isEmpty())
 			throw new Exception("No images");
 		
-		list.stream().forEach(c->{
-			File file = new File(STORAGE_PATH+c.getName());			
-			ImageDataDto img = null;
-			try {
-				img = new ImageDataDto(c.getImageId(), Files.readAllBytes(file.toPath()));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			res.add(img);
+		list.stream().forEach(c->{			
+			res.add("localhost:8080/api/image/" + c.getImageId());
 		});
 		return res;
 		
@@ -157,7 +150,13 @@ public class UserServiceImpl implements UserService{
 		mailSender.send(mimeMessage);
 	}
 	
-	
+	public String getImageById(int id) throws Exception{
+		var img = imgRepo.findById(id).orElseThrow(() -> new Exception("No images by this id"));
+		String path = STORAGE_PATH + img.getName();
+		log.info(path);
+		
+		return path;
+	}
 	
 	private User getCurrentUser(String email) {		
 		return userRepo.findByEmail(email).get();

@@ -16,9 +16,16 @@ import io.jsonwebtoken.Jwts;
 
 @Service
 public class JwtService {
+	
+	private SecretKey key;
+	
+	JwtService(){
+		key = generateKey();
+	}
 
 	public String extractUserMail(String token) {
-		return extractClaims(token).getIssuer();
+		String subject = extractClaims(token).getSubject();
+		return subject;
 	}
 	
 	public Date extractExpirationTime(String token) {
@@ -27,7 +34,7 @@ public class JwtService {
 	
 	private Claims extractClaims(String token) {
 		return Jwts.parser()
-					.verifyWith(generateKey())
+					.verifyWith(key)
 					.build()
 					.parseSignedClaims(token)
 					.getPayload();
@@ -57,11 +64,11 @@ public class JwtService {
 					.issuedAt(new Date(System.currentTimeMillis()))
 					.expiration(new Date(System.currentTimeMillis() + 1000 * 30 * 10))
 					.claims(claim)
-					.signWith(generateKey())
+					.signWith(key)
 					.compact();
 	}
 	
 	public Boolean validateToken(String token) {
-		return (extractExpirationTime(token).before(new Date()));
+		return (!extractExpirationTime(token).before(new Date()));
 	}
 }

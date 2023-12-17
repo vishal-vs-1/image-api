@@ -15,9 +15,12 @@ public interface UserService {
 	
 	public String getRandomImage() throws Exception;
 	
-	public List<ImageDataDto> getAllUserImages(String email) throws Exception;
+	public List<String> getAllUserImages(String email) throws Exception;
 	
 	public void deleteImages(int id, String email) throws Exception;
 
 	public void mailRandomImage(String name, String receiverMail) throws Exception;
+	
+	public String getImageById(int id) throws Exception;
+	
 }

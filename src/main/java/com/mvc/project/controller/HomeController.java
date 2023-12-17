@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,6 +45,27 @@ public class HomeController {
 			case ".gif" : response.setContentType(MediaType.IMAGE_GIF_VALUE);
 		}
 		
+		StreamUtils.copy(is, response.getOutputStream());
+	}
+	
+	@GetMapping(value = "/image/{id}", produces = { MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_GIF_VALUE,
+			MediaType.IMAGE_JPEG_VALUE })
+	public void getImageById(HttpServletResponse response, @PathVariable int id) throws Exception {
+		String path = userService.getImageById(id);
+		String ext = path.substring(path.lastIndexOf("."));
+
+		File file = new File(path);
+		InputStream is = new FileInputStream(file);
+
+		switch (ext) {
+		case ".jpeg":
+			response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+		case ".png":
+			response.setContentType(MediaType.IMAGE_PNG_VALUE);
+		case ".gif":
+			response.setContentType(MediaType.IMAGE_GIF_VALUE);
+		}
+
 		StreamUtils.copy(is, response.getOutputStream());
 	}
 }
