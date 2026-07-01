@@ -34,4 +34,4 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
-          sleep 600
+          sleep 100
